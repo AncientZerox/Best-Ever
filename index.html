@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hilbert's Hotel</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Pacifico&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
+    rel="stylesheet"
+  />
+
+  <style>
+
+@keyframes screenShake {
+  0% { transform: translate(2px, 2px) rotate(0deg); }
+  10% { transform: translate(-2px, -3px) rotate(-1deg); }
+  20% { transform: translate(-4px, 0px) rotate(1deg); }
+  30% { transform: translate(4px, 3px) rotate(0deg); }
+  40% { transform: translate(2px, -2px) rotate(1deg); }
+  50% { transform: translate(-1px, 2px) rotate(-1deg); }
+  60% { transform: translate(-3px, 1px) rotate(0deg); }
+  70% { transform: translate(3px, 1px) rotate(-1deg); }
+  80% { transform: translate(-2px, -1px) rotate(1deg); }
+  90% { transform: translate(2px, 2px) rotate(0deg); }
+  100% { transform: translate(0, 0) rotate(0); }
+}
+
+.screen-shake {
+  animation: screenShake 0.05s infinite;
+}
+
+.chaos-line {
+  pointer-events: none;
+  position: fixed;
+  mix-blend-mode: screen;
+  animation: flicker 0.1s infinite alternate;
+}
+
+@keyframes flicker {
+  from { opacity: 0.3; }
+  to { opacity: 1; }
+}
+
+    /* === Global Styles === */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(135deg, #0a0e27, #1b1f3b, #ff7b00);
+      background-attachment: fixed;
+      color: #f5f5f5;
+      font-family: 'Poppins', sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* Smooth shifting animation */
+
+    @keyframes shiftRight {
+  0% { transform: translateX(0); opacity: 1; }
+  30% { transform: translateX(20px); opacity: 0.7; }
+  60% { transform: translateX(-10px); opacity: 0.9; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+
+.room.shift {
+  animation: shiftRight 0.6s ease-in-out;
+}
+
+@keyframes shiftLeft {
+  0% { transform: translateX(0); opacity: 1; }
+  30% { transform: translateX(-20px); opacity: 0.7; }
+  60% { transform: translateX(10px); opacity: 0.9; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+
+.room.shift-reverse {
+  animation: shiftLeft 0.6s ease-in-out;
+}
+
+@keyframes shiftWave {
+  0% { transform: translateX(0); }
+  50% { transform: translateX(-15px) rotate(-2deg); }
+  100% { transform: translateX(0); }
+}
+
+.shift-wave {
+  animation: shiftWave 0.5s ease-in-out;
+}
+
+@keyframes blackout {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+body.rebooting {
+  animation: blackout 1s ease-in-out forwards;
+}
+
+
+.room.shift {
+  animation: shiftRight 0.6s ease-in-out;
+}
+
+
+    /* === Welcome Heading === */
+    .top-welcome {
+      width: 100%;
+      text-align: center;
+      padding: 20px 0;
+      font-family: 'Pacifico', cursive;
+      font-size: 3rem;
+      color: #00ffff;
+      text-shadow: 0 0 20px #00bfff, 0 0 40px #ff7b00;
+      animation: fadeIn 2s ease forwards;
+      margin-bottom: 50px;
+    }
+
+    /* === Hero Section === */
+    #hero {
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at center, rgba(255, 123, 0, 0.15) 0%, transparent 70%);
+      animation: pulse 6s infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 0.7; }
+    }
+
+    .hero-heading {
+      font-family: 'Pacifico', cursive;
+      font-size: 3.5rem;
+      color: #00ffff;
+      text-shadow: 0 0 25px rgba(0, 255, 247, 0.7), 0 0 40px rgba(255, 123, 0, 0.6);
+      animation: fadeIn 2s ease forwards;
+    }
+
+    .hero-sub {
+      font-size: 1.2rem;
+      color: #ddd;
+      margin-top: 35px;
+      max-width: 600px;
+      line-height: 1.5;
+      animation: fadeIn 2s ease 0.5s forwards;
+      opacity: 0;
+      font-family: 'Roboto', sans-serif;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); opacity: 1; }
+    }
+
+    /* === Scroll Button === */
+    .scroll-btn {
+      position: absolute;
+      bottom: 20px; /* adjusted lower */
+      background: transparent;
+      border: 2px solid #00ffff;
+      color: #00ffff;
+      padding: 10px 25px;
+      border-radius: 8px;
+      font-family: 'Pacifico', cursive;
+      font-size: 1.2rem;
+      cursor: pointer;
+      animation: hintBounce 2.5s infinite ease-in-out;
+      text-shadow: 0 0 10px #00ffff;
+      box-shadow: 0 0 20px rgba(255, 123, 0, 0.4);
+      transition: all 0.3s ease;
+    }
+
+    .scroll-btn:hover {
+      background: linear-gradient(90deg, #00bfff, #ff7b00);
+      color: #fff;
+      box-shadow: 0 0 25px #00ffff, 0 0 45px #ff7b00;
+      border-color: transparent;
+    }
+
+    @keyframes hintBounce {
+      0%, 100% { transform: translateY(0); opacity: 0.7; }
+      50% { transform: translateY(8px); opacity: 1; }
+    }
+
+    /* === Dynamic Section === */
+    .dynamic-section {
+      text-align: center;
+      padding: 50px 0;
+    }
+
+    .button-row {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin: 30px 0;
+    }
+
+    .hotel-btn {
+      background: #1a1f3b;
+      color: #f5f5f5;
+      border: 2px solid #00ffff;
+      padding: 12px 25px;
+      border-radius: 10px;
+      font-family: 'Roboto', sans-serif;
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: 0 0 12px rgba(0, 255, 255, 0.3);
+      animation: floatSlow 6s ease-in-out infinite;
+      transition: all 0.3s ease;
+    }
+
+    .hotel-btn:hover {
+      background: linear-gradient(90deg, #00bfff, #ff7b00);
+      color: #fff;
+      box-shadow: 0 0 25px #00ffff, 0 0 35px #ff7b00;
+      transform: scale(1.05);
+    }
+
+    @keyframes floatSlow {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-2px); }
+    }
+
+    .status-box {
+      max-width: 600px;
+      margin: 30px auto;
+      padding: 15px;
+      border: 2px solid #00ffff;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+      color: #f0f0f0;
+      background: rgba(10, 14, 39, 0.6);
+      font-family: 'Roboto', sans-serif;
+      font-size: 1rem;
+    }
+
+    .rooms {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-top: 40px;
+    }
+
+    .room {
+      width: 100px;
+      height: 100px;
+      border-radius: 10px;
+      background: rgba(20, 24, 59, 0.9);
+      border: 2px solid #00bfff;
+      color: #ff7b00;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Roboto', sans-serif;
+      font-weight: bold;
+      text-shadow: 0 0 10px #ff7b00;
+      transition: all 0.6s ease-in-out;
+    }
+
+    .room.full {
+      background: rgba(255, 123, 0, 0.2);
+      color: #fff;
+      text-shadow: 0 0 10px #00ffff, 0 0 20px #ff7b00;
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      margin-top: 60px;
+      border-radius: 10px;
+      color: #fff;
+      font-family: 'Roboto', sans-serif;
+      position: relative;
+      overflow: hidden;
+      border: 2px solid transparent;
+      animation: neonBorder 5s linear infinite;
+    }
+
+    @keyframes neonBorder {
+      0% { border-color: #00bfff; box-shadow: 0 0 10px #00bfff; }
+      50% { border-color: #ff7b00; box-shadow: 0 0 20px #ff7b00; }
+      100% { border-color: #00bfff; box-shadow: 0 0 10px #00bfff; }
+    }
+
+    .Dynamic-Heading {
+  font-family: 'Pacifico', cursive;
+  font-size: 2.8rem;
+  color: #00ffff;
+  text-align: center;
+  text-shadow:
+    0 0 10px #00bfff,
+    0 0 20px #ff7b00,
+    0 0 40px rgba(255, 123, 0, 0.6);
+  margin-bottom: 25px;
+  letter-spacing: 1px;
+  animation: fadeIn 2s ease forwards, glowShift 4s infinite alternate ease-in-out;
+  position: relative;
+}
+
+@keyframes glowShift {
+  0% {
+    text-shadow:
+      0 0 10px #00ffff,
+      0 0 25px #00bfff,
+      0 0 40px rgba(255, 123, 0, 0.4);
+    color: #00ffff;
+  }
+  100% {
+    text-shadow:
+      0 0 10px #ff7b00,
+      0 0 25px #ffb347,
+      0 0 40px rgba(0, 255, 255, 0.4);
+    color: #ffae42;
+  }
+}
+
+@keyframes glitch {
+  0% { filter: hue-rotate(0deg) brightness(1); transform: skew(0deg); }
+  25% { filter: hue-rotate(90deg) brightness(1.3); transform: skew(-2deg); }
+  50% { filter: hue-rotate(180deg) brightness(0.8); transform: skew(2deg); }
+  75% { filter: hue-rotate(270deg) brightness(1.2); transform: skew(-1deg); }
+  100% { filter: hue-rotate(360deg) brightness(1); transform: skew(0deg); }
+}
+
+
+  </style>
+</head>
+<body>
+  <section id="hero">
+    <div class="top-welcome">Welcome to Hilbert's Hotel</div>
+    <h1 class="hero-heading">Infinity Always Finds a Room</h1>
+    <p class="hero-sub">Welcome to Hilbert's Hotel — where even the impossible checks in are possible, and every infinity gets a key.</p>
+    <button class="scroll-btn" onclick="document.querySelector('.dynamic-section').scrollIntoView({behavior:'smooth'})">Click to Continue ↓</button>
+  </section>
+
+  <section class="dynamic-section">
+
+    <p class="Dynamic-Heading"> Dynamic Infinity Simulation </p>
+
+    <div class="button-row">
+      <button class="hotel-btn">Fill All Rooms</button>
+      <button class="hotel-btn">1 Guest Arrives</button>
+      <button class="hotel-btn">1 Guest Leaves</button>
+      <button class="hotel-btn">Infinite Guest Arrives</button>
+    </div>
+
+    <div class="button-row">
+      <button class="hotel-btn">Infinite Guest Leaves</button>
+      <button class="hotel-btn">Infinite Buses with Infinite People</button>
+      <button class="hotel-btn">Uncountable Infinity Arrives</button>
+      <button class="hotel-btn">Reset Simulation</button>
+    </div>
+
+    <div class="status-box">
+      <p>Status updates will appear here...</p>
+    </div>
+
+    <div class="rooms">
+      <div class="room">Empty</div>
+      <div class="room">Empty</div>
+      <div class="room">Empty</div>
+      <div class="room">Empty</div>
+      <div class="room">Empty</div>
+      <div class="room">Empty</div>
+      <div class="room">Empty</div>
+      <div class="room">Empty</div>
+    </div>
+  </section>
+
+  <footer>Heat-Harvestors © All Rights Reserved</footer>
+
+<script>
+// === Smooth scroll ===
+function scrollToDynamic() {
+  document.querySelector('#dynamic').scrollIntoView({
+    behavior: 'smooth'
+  });
+}
+
+// === Select Elements ===
+const fillRoomsBtn = document.querySelectorAll('.hotel-btn')[0];
+const oneGuestBtn = document.querySelectorAll('.hotel-btn')[1];
+const oneGuestLeavesBtn = document.querySelectorAll('.hotel-btn')[2];
+const rooms = document.querySelectorAll('.room');
+const statusBox = document.querySelector('.status-box p');
+
+// === Fill All Rooms ===
+fillRoomsBtn.addEventListener('click', () => {
+  rooms.forEach((room, i) => {
+    room.classList.add('full');
+    room.style.background = 'rgba(255, 123, 0, 0.25)';
+    room.style.borderColor = '#ff7b00';
+    room.style.boxShadow = '0 0 25px rgba(255, 140, 0, 0.6)';
+    room.style.color = '#ffffff';
+    room.textContent = `Room ${i + 1}: Full`;
+  });
+
+  statusBox.textContent =
+    'All rooms are now filled! Every guest has settled in — yet infinity always has space for more...';
+  statusBox.style.color = '#ffb347';
+  statusBox.style.textShadow = '0 0 15px rgba(255, 140, 0, 0.5)';
+});
+
+// === 1 Guest Arrives ===
+oneGuestBtn.addEventListener('click', () => {
+  const emptyRoom = Array.from(rooms).find(r => !r.classList.contains('full'));
+
+  if (emptyRoom) {
+    // Fill the next empty room
+    const i = Array.from(rooms).indexOf(emptyRoom);
+    emptyRoom.classList.add('full');
+    emptyRoom.style.background = 'rgba(255, 123, 0, 0.25)';
+    emptyRoom.style.borderColor = '#ff7b00';
+    emptyRoom.style.boxShadow = '0 0 25px rgba(255, 140, 0, 0.6)';
+    emptyRoom.style.color = '#ffffff';
+    emptyRoom.textContent = `Room ${i + 1}: Full`;
+
+    statusBox.textContent = 'A new guest has checked in! One more room is now full.';
+    statusBox.style.color = '#00ffff';
+    statusBox.style.textShadow = '0 0 15px #00ffff';
+  } else {
+    // All rooms full → Hilbert shift
+    statusBox.textContent = 'All rooms are full! Shifting everyone by one room to make space...';
+    statusBox.style.color = '#ff7b00';
+    statusBox.style.textShadow = '0 0 15px #ff7b00';
+
+    rooms.forEach((room, index) => {
+      setTimeout(() => {
+        room.classList.add('shift');
+        setTimeout(() => room.classList.remove('shift'), 600);
+      }, index * 100);
+    });
+
+    // Logical shift after animation
+    setTimeout(() => {
+      for (let i = rooms.length - 1; i > 0; i--) {
+        if (rooms[i - 1].classList.contains('full')) {
+          rooms[i].classList.add('full');
+          rooms[i].style.background = rooms[i - 1].style.background;
+          rooms[i].style.borderColor = rooms[i - 1].style.borderColor;
+          rooms[i].style.boxShadow = rooms[i - 1].style.boxShadow;
+          rooms[i].style.color = rooms[i - 1].style.color;
+          rooms[i].textContent = `Room ${i + 1}: Full`;
+        } else {
+          rooms[i].classList.remove('full');
+          rooms[i].style.background = 'rgba(20, 24, 59, 0.9)';
+          rooms[i].style.borderColor = '#00bfff';
+          rooms[i].style.boxShadow = '0 0 10px rgba(0, 255, 255, 0.3)';
+          rooms[i].style.color = '#ff7b00';
+          rooms[i].textContent = `Room ${i + 1}: Empty`;
+        }
+      }
+
+      // Add new guest in Room 1
+      const firstRoom = rooms[0];
+      firstRoom.classList.add('full');
+      firstRoom.style.background = 'rgba(255, 123, 0, 0.25)';
+      firstRoom.style.borderColor = '#ff7b00';
+      firstRoom.style.boxShadow = '0 0 25px rgba(255, 140, 0, 0.6)';
+      firstRoom.style.color = '#ffffff';
+      firstRoom.textContent = `Room 1: New Guest`;
+
+      statusBox.textContent = '✨ Infinity magic! Every guest shifted right, and Room 1 welcomed a new guest.';
+      statusBox.style.color = '#00ffff';
+      statusBox.style.textShadow = '0 0 15px #00ffff';
+    }, rooms.length * 100 + 600);
+  }
+});
+
+// === 1 Guest Leaves ===
+oneGuestLeavesBtn.addEventListener('click', () => {
+  const fullRooms = Array.from(rooms).filter(r => r.classList.contains('full'));
+
+  if (fullRooms.length === 0) {
+    statusBox.textContent = 'No guests left! The hotel stands empty once again.';
+    statusBox.style.color = '#ff4d4d';
+    statusBox.style.textShadow = '0 0 15px #ff4d4d';
+    return;
+  }
+
+  statusBox.textContent = 'A guest is leaving... shifting everyone down one room.';
+  statusBox.style.color = '#00ffff';
+  statusBox.style.textShadow = '0 0 15px #00ffff';
+
+  // Reverse-wave animation
+  [...rooms].reverse().forEach((room, index) => {
+    setTimeout(() => {
+      room.classList.add('shift-reverse');
+      setTimeout(() => room.classList.remove('shift-reverse'), 600);
+    }, index * 100);
+  });
+
+  // Logical shift
+  setTimeout(() => {
+    for (let i = 0; i < rooms.length - 1; i++) {
+      if (rooms[i + 1].classList.contains('full')) {
+        rooms[i].classList.add('full');
+        rooms[i].style.background = rooms[i + 1].style.background;
+        rooms[i].style.borderColor = rooms[i + 1].style.borderColor;
+        rooms[i].style.boxShadow = rooms[i + 1].style.boxShadow;
+        rooms[i].style.color = rooms[i + 1].style.color;
+        rooms[i].textContent = `Room ${i + 1}: Full`;
+      } else {
+        rooms[i].classList.remove('full');
+        rooms[i].style.background = 'rgba(20, 24, 59, 0.9)';
+        rooms[i].style.borderColor = '#00bfff';
+        rooms[i].style.boxShadow = '0 0 10px rgba(0, 255, 255, 0.3)';
+        rooms[i].style.color = '#ff7b00';
+        rooms[i].textContent = `Room ${i + 1}: Empty`;
+      }
+    }
+
+    // Empty the last room
+    const lastRoom = rooms[rooms.length - 1];
+    lastRoom.classList.remove('full');
+    lastRoom.style.background = 'rgba(20, 24, 59, 0.9)';
+    lastRoom.style.borderColor = '#00bfff';
+    lastRoom.style.boxShadow = '0 0 10px rgba(0, 255, 255, 0.3)';
+    lastRoom.style.color = '#ff7b00';
+    lastRoom.textContent = `Room ${rooms.length}: Empty`;
+
+    statusBox.textContent = '🚪 One guest has checked out. Infinity still goes on...';
+    statusBox.style.color = '#ffb347';
+    statusBox.style.textShadow = '0 0 15px #ffb347';
+  }, rooms.length * 100 + 600);
+});
+
+const infiniteGuestsBtn = document.querySelectorAll('.hotel-btn')[3]; // "Infinite Guests Arrive" button
+
+infiniteGuestsBtn.addEventListener('click', () => {
+  statusBox.textContent = '♾️ Infinite buses arriving — all current guests move to even-numbered rooms!';
+  statusBox.style.color = '#00ffff';
+  statusBox.style.textShadow = '0 0 20px #00ffff';
+
+  // Step 1: Highlight old guests (orange)
+  rooms.forEach((room, i) => {
+    if (room.classList.contains('full')) {
+      room.style.transition = 'all 0.3s ease';
+      room.style.boxShadow = '0 0 25px rgba(255, 140, 0, 0.7)';
+    }
+  });
+
+  // Step 2: Animate wave (shifting right)
+  rooms.forEach((room, i) => {
+    setTimeout(() => {
+      room.classList.add('shift');
+      setTimeout(() => room.classList.remove('shift'), 400);
+    }, i * 80);
+  });
+
+  // Step 3: Logic after animation
+  setTimeout(() => {
+    // Store current states
+    const oldStates = Array.from(rooms).map(r =>
+      r.classList.contains('full') ? r.textContent : null
+    );
+
+    // Clear all rooms first (dim)
+    rooms.forEach((room, i) => {
+      room.classList.remove('full');
+      room.style.background = 'rgba(255, 255, 255, 0.05)';
+      room.style.borderColor = '#333';
+      room.style.boxShadow = 'none';
+      room.style.color = '#666';
+      room.textContent = `Room ${i + 1}: Empty`;
+    });
+
+    // Move old guests to even-numbered rooms
+    for (let i = 0; i < oldStates.length; i++) {
+      const newIndex = (i + 1) * 2 - 1; // 1→2, 2→4, ...
+      if (newIndex < rooms.length) {
+        const room = rooms[newIndex];
+        room.classList.add('full');
+        room.style.background = 'rgba(255, 123, 0, 0.25)';
+        room.style.borderColor = '#ff7b00';
+        room.style.boxShadow = '0 0 25px rgba(255, 140, 0, 0.6)';
+        room.style.color = '#fff';
+        room.textContent = oldStates[i] || `Room ${newIndex + 1}: Full`;
+      }
+    }
+
+    // Fill all odd rooms with new guests (cyan)
+    for (let i = 0; i < rooms.length; i += 2) {
+      rooms[i].classList.add('full');
+      rooms[i].style.background = 'rgba(0, 255, 255, 0.2)';
+      rooms[i].style.borderColor = '#00ffff';
+      rooms[i].style.boxShadow = '0 0 25px rgba(0, 255, 255, 0.6)';
+      rooms[i].style.color = '#fff';
+      rooms[i].textContent = `Room ${i + 1}: New Guest`;
+    }
+
+    // Step 4: Status Update
+    statusBox.textContent =
+      '♾️ Infinite new guests arrived All previous guests shifted to even rooms by multiplying 2 into their room number';
+    statusBox.style.color = '#ffb347';
+    statusBox.style.textShadow = '0 0 20px #ffb347';
+  }, rooms.length * 80 + 600);
+});
+
+const infiniteLeavesBtn = document.querySelectorAll('.hotel-btn')[4]; // "Infinite Guests Leave" button
+
+infiniteLeavesBtn.addEventListener('click', () => {
+  statusBox.textContent = '♾️ Infinite guests are leaving... clearing even-numbered rooms!';
+  statusBox.style.color = '#ff4d4d';
+  statusBox.style.textShadow = '0 0 20px #ff4d4d';
+
+  // Step 1: Highlight even rooms as leaving (red wave)
+  rooms.forEach((room, i) => {
+    if ((i + 1) % 2 === 0) {
+      setTimeout(() => {
+        room.style.transition = 'all 0.3s ease';
+        room.style.background = 'rgba(255, 0, 0, 0.25)';
+        room.style.borderColor = '#ff4d4d';
+        room.style.boxShadow = '0 0 25px rgba(255, 50, 50, 0.6)';
+        room.textContent = `Room ${i + 1}: Guest Left`;
+        room.classList.remove('full');
+      }, i * 100);
+    }
+  });
+
+  // Step 2: Reverse wave animation for guests leaving
+  setTimeout(() => {
+    [...rooms].reverse().forEach((room, index) => {
+      setTimeout(() => {
+        room.classList.add('shift-reverse');
+        setTimeout(() => room.classList.remove('shift-reverse'), 400);
+      }, index * 80);
+    });
+  }, rooms.length * 100 + 500);
+
+  // Step 3: Apply new final room states
+  setTimeout(() => {
+    rooms.forEach((room, i) => {
+      if ((i + 1) % 2 !== 0) {
+        // Odd-numbered room → full
+        room.classList.add('full');
+        room.style.background = 'rgba(255, 123, 0, 0.25)';
+        room.style.borderColor = '#ff7b00';
+        room.style.boxShadow = '0 0 25px rgba(255, 140, 0, 0.6)';
+        room.style.color = '#fff';
+        room.textContent = `Room ${i + 1}: Full`;
+      } else {
+        // Even-numbered room → empty
+        room.classList.remove('full');
+        room.style.background = 'rgba(255, 255, 255, 0.05)';
+        room.style.borderColor = '#333';
+        room.style.boxShadow = 'none';
+        room.style.color = '#666';
+        room.textContent = `Room ${i + 1}: Empty`;
+      }
+    });
+
+    statusBox.textContent =
+      '♾️ Infinite guests left — even-numbered rooms are now empty, odd remain full!';
+    statusBox.style.color = '#00ffff';
+    statusBox.style.textShadow = '0 0 20px #00ffff';
+  }, rooms.length * 180 + 1000);
+});
+
+const infiniteBusesBtn = document.querySelectorAll('.hotel-btn')[5]; // "Infinite Buses Arrive" button
+
+infiniteBusesBtn.addEventListener('click', () => {
+  statusBox.textContent = '🚌♾️ Infinite buses with infinite guests are arriving!';
+  statusBox.style.color = '#ffa600';
+  statusBox.style.textShadow = '0 0 20px #ffa600';
+
+  // Step 1: Vibrant flashing effect — infinite guests incoming
+  rooms.forEach((room, i) => {
+    setTimeout(() => {
+      room.style.transition = 'all 0.3s ease';
+      room.style.background = 'linear-gradient(135deg, #00b4ff55, #ff7b0055)';
+      room.style.borderColor = '#00ffff';
+      room.style.boxShadow = '0 0 30px #00ffff';
+      room.textContent = `Room ${i + 1}: Reassigning...`;
+    }, i * 120);
+  });
+
+  // Step 2: Cascading neon wave — shifting everyone infinitely
+  setTimeout(() => {
+    rooms.forEach((room, index) => {
+      setTimeout(() => {
+        room.classList.add('shift-wave');
+        setTimeout(() => room.classList.remove('shift-wave'), 500);
+      }, index * 80);
+    });
+  }, 1000);
+
+  // Step 3: Final state — all rooms full again
+  setTimeout(() => {
+    rooms.forEach((room, i) => {
+      room.classList.add('full');
+      room.style.background = 'rgba(255, 123, 0, 0.25)';
+      room.style.borderColor = '#ff7b00';
+      room.style.boxShadow = '0 0 25px rgba(255, 140, 0, 0.6)';
+      room.style.color = '#fff';
+      room.textContent = `Room ${i + 1}: Full (∞ guests assigned)`;
+    });
+
+    statusBox.textContent =
+  '🚌 An infinite convoy of buses arrived, each carrying infinite guests! Each guest is labeled (Bus number, Seat number). To fit everyone, we used a pairing function: Room = 2^Bus × 3^Seat. This unique formula assigns every infinite guest a distinct room — infinity × infinity still fits inside infinity!';
+
+
+    statusBox.style.color = '#00ffff';
+    statusBox.style.textShadow = '0 0 25px #00ffff';
+  }, 3000);
+});
+
+// === Uncountable Infinity Arrives (System Crash & Reboot) ===
+const uncountableBtn = document.querySelectorAll('.hotel-btn')[6]; // "Uncountable Infinity Arrives"
+
+uncountableBtn.addEventListener('click', () => {
+  statusBox.textContent = '⚠️ Attempting to fit uncountable infinity...';
+  statusBox.style.color = '#ff00ff';
+  statusBox.style.textShadow = '0 0 20px #ff00ff';
+
+  // Play glitch/error sound
+  const errorSound = new Audio("https://cdn.pixabay.com/audio/2022/03/15/audio_10bbaae27f.mp3");
+  errorSound.volume = 0.8;
+  errorSound.play().catch(err => console.warn("Audio play blocked:", err));
+
+  // Create glitch overlay
+  const glitchCanvas = document.createElement('canvas');
+  glitchCanvas.id = 'glitchCanvas';
+  glitchCanvas.width = window.innerWidth;
+  glitchCanvas.height = window.innerHeight;
+  glitchCanvas.style.position = 'fixed';
+  glitchCanvas.style.top = '0';
+  glitchCanvas.style.left = '0';
+  glitchCanvas.style.zIndex = '9999';
+  glitchCanvas.style.pointerEvents = 'none';
+  document.body.appendChild(glitchCanvas);
+
+  const ctx = glitchCanvas.getContext('2d');
+  let frames = 0;
+
+  const glitchInterval = setInterval(() => {
+    for (let i = 0; i < 40; i++) {
+      ctx.fillStyle = `hsl(${Math.random() * 360}, 100%, 50%)`;
+      const x = Math.random() * glitchCanvas.width;
+      const y = Math.random() * glitchCanvas.height;
+      const w = Math.random() * 300;
+      const h = Math.random() * 10;
+      ctx.fillRect(x, y, w, h);
+    }
+    frames++;
+    if (frames > 40) {
+      clearInterval(glitchInterval);
+
+      // Flash white → fade to black
+      glitchCanvas.style.transition = 'all 1s ease';
+      glitchCanvas.style.background = '#000';
+      ctx.clearRect(0, 0, glitchCanvas.width, glitchCanvas.height);
+
+      setTimeout(() => {
+        ctx.fillStyle = '#00ffcc';
+        ctx.font = '40px Consolas';
+        ctx.textAlign = 'center';
+        ctx.fillText('💻 System rebooting...', glitchCanvas.width / 2, glitchCanvas.height / 2);
+
+        // === Loading bar ===
+        let progress = 0;
+        const barWidth = 400;
+        const barHeight = 25;
+        const barX = (glitchCanvas.width - barWidth) / 2;
+        const barY = glitchCanvas.height / 2 + 50;
+
+        const loadingInterval = setInterval(() => {
+          ctx.strokeStyle = '#00ffcc';
+          ctx.lineWidth = 3;
+          ctx.strokeRect(barX, barY, barWidth, barHeight);
+
+          ctx.fillStyle = '#00ffcc';
+          ctx.fillRect(barX, barY, (barWidth * progress) / 100, barHeight);
+
+          ctx.font = '20px Consolas';
+          ctx.fillText(`${progress}%`, glitchCanvas.width / 2, barY + 50);
+
+          progress += 2;
+          if (progress > 100) {
+            clearInterval(loadingInterval);
+          }
+        }, 60);
+        // === End loading bar ===
+      }, 800);
+
+      // Reboot complete — remove overlay and reset rooms
+      setTimeout(() => {
+        document.body.removeChild(glitchCanvas);
+        rooms.forEach((room, i) => {
+          room.classList.remove('full');
+          room.style.background = 'rgba(255, 255, 255, 0.05)';
+          room.style.borderColor = '#333';
+          room.style.boxShadow = 'none';
+          room.style.color = '#666';
+          room.textContent = `Room ${i + 1}: Empty`;
+        });
+        statusBox.textContent = '✅ System restored successfully. Uncountable infinity cannot be simulated.';
+        statusBox.style.color = '#00ffff';
+        statusBox.style.textShadow = '0 0 15px #00ffff';
+      }, 4000);
+    }
+  }, 80);
+});
+
+// Select the last button (assuming "Reset Simulation" is last)
+const resetBtn = document.querySelectorAll('.hotel-btn')[document.querySelectorAll('.hotel-btn').length - 1];
+
+resetBtn.addEventListener('click', () => {
+  // Stop chaos effect
+  document.querySelectorAll('.chaos-line').forEach(line => line.remove());
+  document.body.style.animation = 'none';
+  document.body.style.background = '#0a0a0a';
+
+  // Clear all rooms
+  rooms.forEach((room, i) => {
+    room.classList.remove('filled', 'full', 'shift-reverse');
+    room.style.background = 'rgba(255,255,255,0.05)';
+    room.style.borderColor = '#333';
+    room.style.boxShadow = 'none';
+    room.style.color = '#666';
+    room.textContent = `Room ${i + 1}: Empty`;
+  });
+
+  // Reset status box
+  statusBox.textContent = '🏨 Simulation reset — The Hilbert Hotel is peaceful again.';
+  statusBox.style.color = '#00ffcc';
+  statusBox.style.textShadow = '0 0 15px #00ffcc';
+
+  // Smooth fade-in reboot animation
+  document.body.animate(
+    [
+      { opacity: 0, filter: 'blur(15px)' },
+      { opacity: 1, filter: 'blur(0px)' }
+    ],
+    {
+      duration: 1200,
+      easing: 'ease-in-out'
+    }
+  );
+});
+
+</script>
+
+</body>
+</html>
