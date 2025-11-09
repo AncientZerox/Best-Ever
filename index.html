@@ -729,138 +729,45 @@ infiniteBusesBtn.addEventListener('click', () => {
 });
 
 // === Uncountable Infinity Arrives (System Crash & Reboot) ===
-const uncountableBtn = document.querySelectorAll('.hotel-btn')[6]; // "Uncountable Infinity Arrives"
+const uncountableBtn = document.querySelectorAll('.hotel-btn')[6];
+
+const errorSound = new Audio("https://files.catbox.moe/26aptq.mp3"); // Stable sound file
+errorSound.volume = 0.7;
 
 uncountableBtn.addEventListener('click', () => {
-  statusBox.textContent = '⚠️ Attempting to fit uncountable infinity...';
+  console.log("Autoplay permission granted after click:");
+  errorSound.play().catch(err => console.warn("Audio play blocked:", err));
+
+  statusBox.textContent = '⚠️ Uncountable infinity detected — initializing system reboot...';
   statusBox.style.color = '#ff00ff';
   statusBox.style.textShadow = '0 0 20px #ff00ff';
 
-  // Play glitch/error sound
-  const errorSound = new Audio("https://cdn.pixabay.com/audio/2022/03/15/audio_10bbaae27f.mp3");
-  errorSound.volume = 0.8;
-  errorSound.play().catch(err => console.warn("Audio play blocked:", err));
+  setTimeout(() => {
+    statusBox.textContent = '💻 Shutting down Hilbert simulation...';
+  }, 1500);
 
-  // Create glitch overlay
-  const glitchCanvas = document.createElement('canvas');
-  glitchCanvas.id = 'glitchCanvas';
-  glitchCanvas.width = window.innerWidth;
-  glitchCanvas.height = window.innerHeight;
-  glitchCanvas.style.position = 'fixed';
-  glitchCanvas.style.top = '0';
-  glitchCanvas.style.left = '0';
-  glitchCanvas.style.zIndex = '9999';
-  glitchCanvas.style.pointerEvents = 'none';
-  document.body.appendChild(glitchCanvas);
+  setTimeout(() => {
+    statusBox.textContent = '🔄 Restarting modules...';
+    statusBox.style.color = '#00ffff';
+  }, 3000);
 
-  const ctx = glitchCanvas.getContext('2d');
-  let frames = 0;
-
-  const glitchInterval = setInterval(() => {
-    for (let i = 0; i < 40; i++) {
-      ctx.fillStyle = `hsl(${Math.random() * 360}, 100%, 50%)`;
-      const x = Math.random() * glitchCanvas.width;
-      const y = Math.random() * glitchCanvas.height;
-      const w = Math.random() * 300;
-      const h = Math.random() * 10;
-      ctx.fillRect(x, y, w, h);
-    }
-    frames++;
-    if (frames > 40) {
-      clearInterval(glitchInterval);
-
-      // Flash white → fade to black
-      glitchCanvas.style.transition = 'all 1s ease';
-      glitchCanvas.style.background = '#000';
-      ctx.clearRect(0, 0, glitchCanvas.width, glitchCanvas.height);
-
-      setTimeout(() => {
-        ctx.fillStyle = '#00ffcc';
-        ctx.font = '40px Consolas';
-        ctx.textAlign = 'center';
-        ctx.fillText('💻 System rebooting...', glitchCanvas.width / 2, glitchCanvas.height / 2);
-
-        // === Loading bar ===
-        let progress = 0;
-        const barWidth = 400;
-        const barHeight = 25;
-        const barX = (glitchCanvas.width - barWidth) / 2;
-        const barY = glitchCanvas.height / 2 + 50;
-
-        const loadingInterval = setInterval(() => {
-          ctx.strokeStyle = '#00ffcc';
-          ctx.lineWidth = 3;
-          ctx.strokeRect(barX, barY, barWidth, barHeight);
-
-          ctx.fillStyle = '#00ffcc';
-          ctx.fillRect(barX, barY, (barWidth * progress) / 100, barHeight);
-
-          ctx.font = '20px Consolas';
-          ctx.fillText(`${progress}%`, glitchCanvas.width / 2, barY + 50);
-
-          progress += 2;
-          if (progress > 100) {
-            clearInterval(loadingInterval);
-          }
-        }, 60);
-        // === End loading bar ===
-      }, 800);
-
-      // Reboot complete — remove overlay and reset rooms
-      setTimeout(() => {
-        document.body.removeChild(glitchCanvas);
-        rooms.forEach((room, i) => {
-          room.classList.remove('full');
-          room.style.background = 'rgba(255, 255, 255, 0.05)';
-          room.style.borderColor = '#333';
-          room.style.boxShadow = 'none';
-          room.style.color = '#666';
-          room.textContent = `Room ${i + 1}: Empty`;
-        });
-        statusBox.textContent = '✅ System restored successfully. Uncountable infinity cannot be simulated.';
-        statusBox.style.color = '#00ffff';
-        statusBox.style.textShadow = '0 0 15px #00ffff';
-      }, 4000);
-    }
-  }, 80);
+  setTimeout(() => {
+    statusBox.textContent = '✅ System restored successfully. Uncountable infinity cannot be simulated.';
+    statusBox.style.color = '#00ffcc';
+    statusBox.style.textShadow = '0 0 15px #00ffff';
+    rooms.forEach((room, i) => {
+      room.classList.remove('full');
+      room.style.background = 'rgba(255, 255, 255, 0.05)';
+      room.style.borderColor = '#333';
+      room.style.boxShadow = 'none';
+      room.style.color = '#666';
+      room.textContent = `Room ${i + 1}: Empty`;
+    });
+  }, 5000);
 });
 
-// Select the last button (assuming "Reset Simulation" is last)
-const resetBtn = document.querySelectorAll('.hotel-btn')[document.querySelectorAll('.hotel-btn').length - 1];
 
-resetBtn.addEventListener('click', () => {
-  // Stop chaos effect
-  document.querySelectorAll('.chaos-line').forEach(line => line.remove());
-  document.body.style.animation = 'none';
-  document.body.style.background = '#0a0a0a';
 
-  // Clear all rooms
-  rooms.forEach((room, i) => {
-    room.classList.remove('filled', 'full', 'shift-reverse');
-    room.style.background = 'rgba(255,255,255,0.05)';
-    room.style.borderColor = '#333';
-    room.style.boxShadow = 'none';
-    room.style.color = '#666';
-    room.textContent = `Room ${i + 1}: Empty`;
-  });
-
-  // Reset status box
-  statusBox.textContent = '🏨 Simulation reset — The Hilbert Hotel is peaceful again.';
-  statusBox.style.color = '#00ffcc';
-  statusBox.style.textShadow = '0 0 15px #00ffcc';
-
-  // Smooth fade-in reboot animation
-  document.body.animate(
-    [
-      { opacity: 0, filter: 'blur(15px)' },
-      { opacity: 1, filter: 'blur(0px)' }
-    ],
-    {
-      duration: 1200,
-      easing: 'ease-in-out'
-    }
-  );
-});
 
 </script>
 
